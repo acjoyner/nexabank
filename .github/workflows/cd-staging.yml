@@ -1,0 +1,75 @@
+# ============================================================
+# NexaBank CD — Deploy to Staging (GitHub Actions)
+# Triggers on push to main branch
+# Requires MANUAL APPROVAL via GitHub Environments (staging)
+# This mirrors the Jenkins input{} gate for change management
+# ============================================================
+name: CD — Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/nexabank
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging (Manual Approval Required)
+    runs-on: ubuntu-latest
+    # "staging" environment has branch protection + required reviewers
+    # configured in GitHub → Settings → Environments → staging
+    environment: staging
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and run integration tests
+        run: mvn verify -P integration-test --no-transfer-progress
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release images
+        run: |
+          SERVICES=(
+            "infrastructure/eureka-server"
+            "infrastructure/config-server"
+            "infrastructure/api-gateway"
+            "services/account-service"
+            "services/transaction-service"
+            "services/notification-service"
+            "services/loan-service"
+          )
+          TAG="${GITHUB_SHA::7}"
+          for SVC in "${SERVICES[@]}"; do
+            NAME=$(basename "$SVC")
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${NAME}"
+            docker build -t "${IMAGE}:${TAG}" -t "${IMAGE}:staging-latest" "./${SVC}"
+            docker push "${IMAGE}:${TAG}"
+            docker push "${IMAGE}:staging-latest"
+          done
+
+      - name: Deploy to staging
+        run: docker-compose -f docker-compose.staging.yml up -d
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET_STAGING }}
+
+      - name: Notify team of staging deployment
+        run: echo "Staging deployment complete. Version ${GITHUB_SHA::7} is live."

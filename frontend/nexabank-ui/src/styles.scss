@@ -1,0 +1,43 @@
+/* NexaBank Global Styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Material card elevation override */
+.mat-mdc-card {
+  margin-bottom: 16px;
+}
+
+/* Status chip colors */
+.status-chip-approved {
+  background-color: #e8f5e9 !important;
+  color: #2e7d32 !important;
+}
+
+.status-chip-rejected {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+}
+
+.status-chip-pending {
+  background-color: #fff8e1 !important;
+  color: #f57f17 !important;
+}
+
+/* Dashboard balance card */
+.balance-card {
+  background: linear-gradient(135deg, #1a237e, #283593);
+  color: white;
+
+  .mat-mdc-card-title {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  .balance-amount {
+    font-size: 2rem;
+    font-weight: 600;
+    color: white;
+  }
+}

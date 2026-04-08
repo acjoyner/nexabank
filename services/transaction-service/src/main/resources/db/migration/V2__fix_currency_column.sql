@@ -1,0 +1,2 @@
+-- Fix CURRENCY column: CHAR(3) → VARCHAR(3) to match Hibernate entity mapping
+ALTER TABLE TRANSACTIONS ALTER COLUMN CURRENCY TYPE VARCHAR(3);

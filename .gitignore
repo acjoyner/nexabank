@@ -1,0 +1,88 @@
+# ─── Java / Maven ───────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
+release.properties
+
+# ─── Spring Boot ────────────────────────────────────────────────
+*.log
+logs/
+spring-shell.log
+
+# ─── NDM Simulation output ──────────────────────────────────────
+**/ndm-outbound/
+**/ndm-inbound/
+
+# ─── Python / AI Layer ──────────────────────────────────────────
+ai-layer/__pycache__/
+ai-layer/*.pyc
+ai-layer/.venv/
+ai-layer/venv/
+ai-layer/.env
+*.pyo
+*.pyd
+.Python
+
+# ─── Angular / Node ─────────────────────────────────────────────
+frontend/nexabank-ui/node_modules/
+frontend/nexabank-ui/dist/
+frontend/nexabank-ui/.angular/
+frontend/nexabank-ui/coverage/
+
+# ─── Environment / Secrets ──────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+**/application-prod.yml
+**/application-staging.yml
+
+# ─── Docker ─────────────────────────────────────────────────────
+.docker/
+
+# ─── IDEs ───────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/
+*.code-workspace
+
+# ─── OS ─────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ─── Test / Coverage ────────────────────────────────────────────
+**/surefire-reports/
+**/failsafe-reports/
+**/jacoco.exec
+**/jacoco/
+
+# ─── SonarQube ──────────────────────────────────────────────────
+.sonar/
+.scannerwork/

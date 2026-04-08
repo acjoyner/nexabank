@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # Global CORS — Angular frontend at localhost:4200
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+            allowedHeaders: ["*"]
+            allowCredentials: true
+            maxAge: 3600
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+        # Public auth endpoints — no JWT required
+        - id: auth-routes
+          uri: lb://account-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: accountServiceCB
+                fallbackUri: forward:/fallback/unavailable
+
+        # Account management — JWT required
+        - id: account-routes
+          uri: lb://account-service
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - JwtAuthFilter
+
+        # Transaction operations — JWT required
+        - id: transaction-routes
+          uri: lb://transaction-service
+          predicates:
+            - Path=/api/transactions/**
+          filters:
+            - JwtAuthFilter
+
+        # Notification retrieval — JWT required
+        - id: notification-routes
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - JwtAuthFilter
+
+        # Loan applications — JWT required
+        - id: loan-routes
+          uri: lb://loan-service
+          predicates:
+            - Path=/api/loans/**
+          filters:
+            - JwtAuthFilter
+
+jwt:
+  secret: ${JWT_SECRET:nexabank-dev-secret-at-least-256-bits-long!}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway

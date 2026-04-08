@@ -1,0 +1,36 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: loan-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nexabank_loans}
+    username: ${SPRING_DATASOURCE_USERNAME:nexabank}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexabank123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+kafka:
+  producer:
+    topics:
+      loan-status-changed: nexabank.loan.status.changed
+
+ai-layer:
+  url: ${AI_LAYER_URL:http://localhost:8000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics

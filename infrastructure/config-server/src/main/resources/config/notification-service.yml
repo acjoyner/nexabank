@@ -1,0 +1,44 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nexabank_notifications}
+    username: ${SPRING_DATASOURCE_USERNAME:nexabank}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexabank123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  activemq:
+    broker-url: ${ACTIVEMQ_BROKER_URL:tcp://localhost:61616}
+    user: nexabank
+    password: nexabank123
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+kafka:
+  consumer:
+    group-id: notification-group
+    topics:
+      transaction-completed: nexabank.transaction.completed
+      account-created: nexabank.account.created
+      loan-status-changed: nexabank.loan.status.changed
+
+activemq:
+  queue:
+    transaction-events: nexabank.transaction.events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
