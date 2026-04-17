@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: nexabank123
       POSTGRES_DB: nexabank
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docs/db-init:/docker-entrypoint-initdb.d

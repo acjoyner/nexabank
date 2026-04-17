@@ -143,16 +143,16 @@ Log in with the credentials above. The dashboard shows account balance, recent t
 | Service | URL | Notes |
 |---|---|---|
 | Angular UI | http://localhost:4200 | Frontend |
-| API Gateway | http://localhost:8080 | All API calls go here |
-| Account Service | http://localhost:8081 | Direct access (dev only) |
-| Transaction Service | http://localhost:8082 | Direct access (dev only) |
-| Notification Service | http://localhost:8083 | Direct access (dev only) |
-| Loan Service | http://localhost:8084 | Direct access (dev only) |
-| AI Layer | http://localhost:8000 | Python FastAPI |
-| Eureka Dashboard | http://localhost:8761 | Service registry |
-| Config Server | http://localhost:8888 | Config endpoint |
-| Kafka UI | http://localhost:9090 | Topic browser |
-| ActiveMQ Admin | http://localhost:8161 | Queue browser (admin/admin) |
+| API Gateway | http://localhost:8080/actuator/health | All API calls go here |
+| Account Service | http://localhost:8081/swagger-ui/index.html | Swagger UI (dev only) |
+| Transaction Service | http://localhost:8082/swagger-ui/index.html | Swagger UI (dev only) |
+| Notification Service | http://localhost:8083/swagger-ui/index.html | Swagger UI (dev only) |
+| Loan Service | http://localhost:8084/swagger-ui/index.html | Swagger UI (dev only) |
+| AI Layer | http://localhost:8000/docs | Python FastAPI Swagger |
+| Eureka Dashboard | http://localhost:8761 | Service registry UI |
+| Config Server | http://localhost:8888/application/default | Default config — use `/{service-name}/default` per service |
+| Kafka UI | http://localhost:9090/ui/clusters/nexabank-cluster/consumer-groups | Consumer groups view |
+| ActiveMQ Admin | http://localhost:8161/console/auth/login | Queue browser (admin/admin) |
 
 ---
 
@@ -235,6 +235,33 @@ cd services/account-service
 mvn spring-boot:run
 ```
 
+### Run the AI Layer
+
+**Option 1 — Docker (recommended, no Python install needed)**
+
+```bash
+# From the project root — starts everything including the AI layer
+docker-compose up -d
+
+# AI layer will be available at http://localhost:8000/docs
+```
+
+**Option 2 — uv (local dev, hot reload)**
+
+```bash
+cd ai-layer
+
+# Install uv (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv
+uv pip install -e .
+
+# Start with hot reload (http://localhost:8000)
+uv run uvicorn main:app --reload --port 8000
+```
+
 ### Run tests
 
 ```bash
@@ -294,6 +321,130 @@ nexabank-platform/
         ├── 10-ci-cd-jenkins-github-actions.md
         └── 11-design-patterns-used.md
 ```
+
+---
+
+## Test Strategy
+
+### Coverage Summary
+
+| Layer | Framework | Status |
+|---|---|---|
+| API Gateway | JUnit 5 + reactor-test | ✅ JWT filter, logging filter, fallback controller |
+| Eureka Server | JUnit 5 + @SpringBootTest | ✅ Context smoke test |
+| Config Server | JUnit 5 + @SpringBootTest | ✅ Context smoke test |
+| Account Service | JUnit 5 + Mockito + MockMvc | ✅ Auth, Account, JWT, factory, controllers |
+| Transaction Service | JUnit 5 + Mockito | ✅ Ledger, transactions, deposit/withdrawal/transfer |
+| Notification Service | JUnit 5 + Mockito | ✅ Service, Kafka handler, JMS handler |
+| Loan Service | JUnit 5 + Mockito | ✅ Rule strategy, AI strategy, service, controller |
+| AI Layer | pytest + httpx TestClient | ✅ Scorer logic, all API endpoints |
+| Angular | Karma + Jasmine | ✅ Auth service, dashboard, deposit, withdrawal, transfer, loan apply |
+
+### Test Phases
+
+**Phase 1 — Infrastructure**
+- `api-gateway`: `JwtAuthFilterTest`, `RequestLoggingFilterTest`, `FallbackControllerTest`, smoke test
+- `eureka-server` / `config-server`: `@SpringBootTest` context load tests
+
+**Phase 2 — Business Services (unit tests with Mockito)**
+- Service layer tests for account, transaction, notification, loan
+- Controller tests with `MockMvc`
+- Kafka listener tests with mocked `ObjectMapper`
+
+**Phase 3 — Integration Tests (H2 + Spring context)**
+- `AccountServiceIntegrationTest` — register flow, balance persistence
+- `LoanEligibilityIntegrationTest` — rule-based strategy wired through Spring
+
+**Phase 4 — AI Layer (uv + pytest)**
+- `test_loan_scorer.py` — 18 tests covering all scoring rules, DTI, loan-to-income, edge cases
+- `test_api.py` — 14 endpoint tests covering eligibility, policy-check, validation, docs
+
+**Phase 5 — Angular (Karma + Jasmine)**
+- `auth.service.spec.ts`, `dashboard.component.spec.ts`, `deposit.component.spec.ts`
+- `withdrawal.component.spec.ts`, `transfer.component.spec.ts`, `loan-apply.component.spec.ts`
+
+---
+
+## Running Tests
+
+### Maven (Java services)
+
+```bash
+# Run all unit tests across all services
+mvn test
+
+# Run single service
+cd services/account-service && mvn test
+cd services/transaction-service && mvn test
+cd services/notification-service && mvn test
+cd services/loan-service && mvn test
+cd infrastructure/api-gateway && mvn test
+cd infrastructure/eureka-server && mvn test
+cd infrastructure/config-server && mvn test
+
+# Run with integration tests
+mvn verify
+
+# Generate JaCoCo coverage report (per service)
+mvn jacoco:report
+```
+
+### Angular
+
+```bash
+cd frontend/nexabank-ui
+
+# Run tests (interactive, with watch)
+npm test
+
+# Run tests once (CI mode, headless)
+npm test -- --watch=false --browsers=ChromeHeadless
+
+# Run with coverage
+npm test -- --code-coverage --watch=false --browsers=ChromeHeadless
+```
+
+### AI Layer (uv + pytest)
+
+```bash
+cd ai-layer
+
+# Install uv (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv
+uv pip install -e ".[test]"
+
+# Run all tests
+uv run pytest
+
+# Run with verbose output
+uv run pytest -v
+
+# Run specific test file
+uv run pytest tests/test_loan_scorer.py -v
+uv run pytest tests/test_api.py -v
+
+# Run the AI layer server
+uv run uvicorn main:app --reload --port 8000
+```
+
+---
+
+## Reports
+
+All generated reports are written to the `reports/` directory at the project root.
+
+| Report | Location | Generated by |
+|---|---|---|
+| JaCoCo (per service) | `{service}/target/site/jacoco/index.html` | `mvn test` or `mvn jacoco:report` |
+| Angular HTML coverage | `reports/angular/index.html` | `npm test -- --code-coverage` |
+| Angular lcov | `reports/angular/lcov.info` | `npm test -- --code-coverage` |
+| pytest HTML report | `reports/pytest/report.html` | `uv run pytest` |
+| pytest coverage HTML | `reports/pytest/coverage/index.html` | `uv run pytest` |
+
+> **Note:** The `reports/` folder is git-ignored for generated content. Run the test commands above to regenerate locally.
 
 ---
 
@@ -370,7 +521,7 @@ Connect to the transaction-service and trigger the NDM method directly via Actua
 
 ### Check ActiveMQ queue depth
 ```
-http://localhost:8161/console
+http://localhost:8161/console/auth/login
 admin / admin
 Queues → nexabank.transaction.events → Number of Pending Messages
 ```

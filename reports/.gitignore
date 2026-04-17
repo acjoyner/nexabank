@@ -1,0 +1,6 @@
+# Ignore generated report content but keep folder structure
+jacoco/
+angular/
+pytest/
+!.gitkeep
+!.gitignore
