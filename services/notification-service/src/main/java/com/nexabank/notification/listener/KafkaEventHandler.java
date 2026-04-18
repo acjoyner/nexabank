@@ -1,6 +1,7 @@
-package com.nexabank.notification.service;
+package com.nexabank.notification.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexabank.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

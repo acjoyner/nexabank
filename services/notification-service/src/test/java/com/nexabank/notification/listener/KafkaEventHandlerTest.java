@@ -3,6 +3,7 @@ package com.nexabank.notification.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nexabank.notification.service.NotificationService;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,10 +46,11 @@ class KafkaEventHandlerTest {
                 "occurredAt", Instant.now().toString()
         ));
 
-        handler.handleTransactionCompleted(payload);
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("nexabank.transaction.completed", 0, 0, "key", payload);
+        handler.handleTransactionCompleted(record);
 
         verify(notificationService).create(
-                anyLong(), eq("TRANSACTION"), anyString(), anyString(),
+                anyLong(), eq("TXN_COMPLETED"), anyString(), anyString(),
                 eq("nexabank.transaction.completed"), any());
     }
 
@@ -64,10 +66,11 @@ class KafkaEventHandlerTest {
                 "occurredAt", Instant.now().toString()
         ));
 
-        handler.handleAccountCreated(payload);
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("nexabank.account.created", 0, 0, "key", payload);
+        handler.handleAccountCreated(record);
 
         verify(notificationService).create(
-                anyLong(), eq("ACCOUNT"), anyString(), anyString(),
+                anyLong(), eq("ACCOUNT_CREATED"), anyString(), anyString(),
                 eq("nexabank.account.created"), any());
     }
 
@@ -82,10 +85,11 @@ class KafkaEventHandlerTest {
                 "occurredAt", Instant.now().toString()
         ));
 
-        handler.handleLoanStatusChanged(payload);
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("nexabank.loan.status.changed", 0, 0, "key", payload);
+        handler.handleLoanStatusChanged(record);
 
         verify(notificationService).create(
-                anyLong(), eq("LOAN"), anyString(), anyString(),
+                anyLong(), eq("LOAN_STATUS_CHANGED"), anyString(), anyString(),
                 eq("nexabank.loan.status.changed"), any());
     }
 }

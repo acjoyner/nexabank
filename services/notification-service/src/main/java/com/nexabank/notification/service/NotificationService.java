@@ -39,13 +39,13 @@ public class NotificationService {
     public Notification markRead(Long notificationId) {
         Notification n = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found: " + notificationId));
-        n.setIsRead(true);
+        n.setRead(true);
         n.setReadAt(Instant.now());
         return notificationRepository.save(n);
     }
 
     @Transactional(readOnly = true)
     public long getUnreadCount(Long customerId) {
-        return notificationRepository.countByCustomerIdAndIsReadFalse(customerId);
+        return notificationRepository.countByCustomerIdAndReadFalse(customerId);
     }
 }

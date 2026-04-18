@@ -34,7 +34,7 @@ class LedgerServiceTest {
         verify(ledgerEntryRepository).save(captor.capture());
 
         LedgerEntry entry = captor.getValue();
-        assertThat(entry.getEntryType().name()).isEqualTo("DEBIT");
+        assertThat(entry.getEntryType()).isEqualTo("DEBIT");
         assertThat(entry.getTransactionId()).isEqualTo(1L);
         assertThat(entry.getAccountId()).isEqualTo(100L);
         assertThat(entry.getAmount()).isEqualByComparingTo("500.00");
@@ -49,7 +49,7 @@ class LedgerServiceTest {
         verify(ledgerEntryRepository).save(captor.capture());
 
         LedgerEntry entry = captor.getValue();
-        assertThat(entry.getEntryType().name()).isEqualTo("CREDIT");
+        assertThat(entry.getEntryType()).isEqualTo("CREDIT");
         assertThat(entry.getAmount()).isEqualByComparingTo("250.00");
     }
 

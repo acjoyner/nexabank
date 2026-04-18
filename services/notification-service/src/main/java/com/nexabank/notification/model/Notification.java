@@ -43,7 +43,7 @@ public class Notification {
 
     @Column(name = "IS_READ", nullable = false)
     @Builder.Default
-    private Boolean isRead = false;
+    private Boolean read = false;
 
     @Column(name = "SENT_AT", nullable = false, updatable = false)
     private Instant sentAt;

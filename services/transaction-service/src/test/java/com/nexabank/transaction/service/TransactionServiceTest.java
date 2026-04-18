@@ -127,14 +127,14 @@ class TransactionServiceTest {
     }
 
     private void mockBalance(Long accountId, String balance) {
-        var balanceResponse = mock(com.nexabank.transaction.dto.BalanceResponse.class);
+        var balanceResponse = mock(com.nexabank.transaction.client.AccountServiceClient.BalanceResponse.class);
         when(balanceResponse.getBalance()).thenReturn(new BigDecimal(balance));
         when(balanceResponse.getStatus()).thenReturn("ACTIVE");
         when(accountServiceClient.getBalance(accountId)).thenReturn(balanceResponse);
     }
 
     private void mockUpdateBalance(Long accountId, String newBalance) {
-        var balanceResponse = mock(com.nexabank.transaction.dto.BalanceResponse.class);
+        var balanceResponse = mock(com.nexabank.transaction.client.AccountServiceClient.BalanceResponse.class);
         when(balanceResponse.getBalance()).thenReturn(new BigDecimal(newBalance));
         when(accountServiceClient.updateBalance(eq(accountId), any(Map.class))).thenReturn(balanceResponse);
     }

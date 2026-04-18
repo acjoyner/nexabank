@@ -46,7 +46,11 @@ class LoanApplicationServiceTest {
     @Test
     void apply_persistsLoanWithAiDecision() {
         LoanApplicationRequest req = buildRequest(LoanType.AUTO, 20000, 60, 70000, 720);
-        EligibilityResult aiResult = new EligibilityResult("ELIGIBLE", "AI approved", "AI");
+        EligibilityResult aiResult = EligibilityResult.builder()
+                .decision("ELIGIBLE")
+                .reason("AI approved")
+                .strategyUsed("AI")
+                .build();
 
         when(aiStrategy.evaluate(req)).thenReturn(aiResult);
         when(loanApplicationRepository.save(any())).thenAnswer(inv -> {
@@ -65,7 +69,11 @@ class LoanApplicationServiceTest {
     @Test
     void apply_aiDecisionPersisted_inAiDecisionField() {
         LoanApplicationRequest req = buildRequest(LoanType.PERSONAL, 5000, 12, 40000, 580);
-        EligibilityResult aiResult = new EligibilityResult("INELIGIBLE", "Low credit score", "AI");
+        EligibilityResult aiResult = EligibilityResult.builder()
+                .decision("INELIGIBLE")
+                .reason("Low credit score")
+                .strategyUsed("AI")
+                .build();
 
         when(aiStrategy.evaluate(req)).thenReturn(aiResult);
         when(loanApplicationRepository.save(any())).thenAnswer(inv -> {

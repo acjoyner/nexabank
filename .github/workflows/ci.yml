@@ -43,10 +43,6 @@ jobs:
 
       - name: Run tests with coverage
         run: mvn test --no-transfer-progress
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/nexabank_test
-          SPRING_DATASOURCE_USERNAME: nexabank
-          SPRING_DATASOURCE_PASSWORD: nexabank123
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

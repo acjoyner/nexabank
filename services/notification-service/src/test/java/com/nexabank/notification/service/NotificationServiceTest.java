@@ -48,7 +48,7 @@ class NotificationServiceTest {
         assertThat(saved.getCustomerId()).isEqualTo(42L);
         assertThat(saved.getType()).isEqualTo("TRANSACTION");
         assertThat(saved.getSubject()).isEqualTo("Transfer Complete");
-        assertThat(saved.isRead()).isFalse();
+        assertThat(saved.getRead()).isFalse();
         assertThat(saved.getCorrelationId()).isEqualTo("corr-123");
     }
 
@@ -73,7 +73,7 @@ class NotificationServiceTest {
 
         Notification result = notificationService.markRead(10L);
 
-        assertThat(result.isRead()).isTrue();
+        assertThat(result.getRead()).isTrue();
         assertThat(result.getReadAt()).isNotNull();
     }
 
@@ -87,7 +87,7 @@ class NotificationServiceTest {
 
     @Test
     void getUnreadCount_returnsCorrectCount() {
-        when(notificationRepository.countByCustomerIdAndIsReadFalse(42L)).thenReturn(3L);
+        when(notificationRepository.countByCustomerIdAndReadFalse(42L)).thenReturn(3L);
 
         assertThat(notificationService.getUnreadCount(42L)).isEqualTo(3L);
     }

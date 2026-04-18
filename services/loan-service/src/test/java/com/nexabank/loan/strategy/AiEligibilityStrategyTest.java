@@ -33,7 +33,11 @@ class AiEligibilityStrategyTest {
     @Test
     void aiUnavailable_fallsBackToRuleBasedStrategy() {
         LoanApplicationRequest req = buildRequest(LoanType.AUTO, 20000, 60, 60000, 700);
-        EligibilityResult ruleResult = new EligibilityResult("ELIGIBLE", "Rule-based approval", "RuleBased");
+        EligibilityResult ruleResult = EligibilityResult.builder()
+                .decision("ELIGIBLE")
+                .reason("Rule-based approval")
+                .strategyUsed("RuleBased")
+                .build();
 
         when(restClient.post()).thenThrow(new RestClientException("Connection refused"));
         when(fallback.evaluate(req)).thenReturn(ruleResult);
